@@ -27,13 +27,15 @@ console.info("rollup server url is ", rollup_server, Network);
 if (Network === undefined) {
   Network = "localhost";
 }
-let dappcontract = "0xa";
-const SWORD_PRICE = BigInt(100000000);
 
+let dappcontract = "0xa"; //address of the cartesi Dapp contract
+const SWORD_PRICE = BigInt(100000000); //price of each sword on the game
 const wallet = new Wallet(new Map());
 const router = new Router(wallet);
 
-wallet.erc20_transfer;
+/** HouseAssets holds all the native assets of this game centrally 
+ 
+**/
 let HouseAssets: {
   coins: number;
   assets: Array<string>;
@@ -44,10 +46,16 @@ let HouseAssets: {
   swords: new Map(),
 };
 
+/**
+ * creating sample native assets for gameplay
+ */
 for (let i = 0; i < 20; i++) {
   HouseAssets.swords.set(uuidv4(), BigInt(10000000));
 }
 
+/**
+ * Missing Dragon class defines each unique instance of Dragon that the user will be interacting with
+ */
 class MissionDragon {
   Id: string;
   private Health: number;
@@ -150,8 +158,12 @@ class Player {
   };
 }
 
+// Players is a Dynamic DA that holds unique player data coressponding to each user
 let Players: Map<string, Player> = new Map();
 
+/**
+ * Each method defines an action that the player can perform while interacting with the DApp
+ */
 class createUser extends AdvanceRoute {
   execute = (request: any) => {
     this.parse_request(request);
@@ -287,6 +299,13 @@ class buySword extends AdvanceRoute {
     } catch (error) {
       return new Error_out(`unable to buy a sword ${error}`);
     }
+    if (output.type === "error") {
+      return new Error_out(output.payload);
+    }
+    const asset = HouseAssets.swords.entries().next().value;
+    player.addSword(asset[0], asset[1]);
+    HouseAssets.swords.delete(asset[0]);
+    return new Notice(`sword with id : ${asset[0]} sold to user : ${id}`);
   };
 }
 
@@ -294,12 +313,24 @@ class MintGold extends AdvanceRoute {
   execute = (request: any) => {
     this.parse_request(request);
     console.log("minting gold");
-    const call = encodeFunctionData({
-      abi: erc20abi,
-      functionName: "mintTo",
-      args: [this.msg_sender],
-    });
-    return new Voucher(erc20_contract_address, hexToBytes(call));
+    try {
+      wallet.erc20_transfer(
+        getAddress(dappcontract),
+        getAddress(this.msg_sender),
+        getAddress(erc20_contract_address),
+        BigInt(this.request_args.amount)
+      );
+      wallet.erc20_withdraw(
+        getAddress(this.msg_sender),
+        getAddress(erc20_contract_address),
+        BigInt(this.request_args.amount)
+      );
+      return new Notice(
+        `minting gold units: ${this.request_args.amount} to real world for user ${this.msg_sender} `
+      );
+    } catch (e) {
+      return new Error_out(`error minting gold ${e}`);
+    }
   };
 }
 

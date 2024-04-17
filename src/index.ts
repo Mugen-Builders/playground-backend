@@ -1,4 +1,4 @@
-import { AdvanceRoute, Router } from "cartesi-router";
+import { AdvanceRoute, Router, WalletRoute } from "cartesi-router";
 import {
   Wallet,
   Notice,
@@ -188,7 +188,7 @@ class setCatchPhrase extends AdvanceRoute {
   };
 }
 
-class signupForAmission extends AdvanceRoute {
+class signupforMission extends AdvanceRoute {
   execute = (request: any) => {
     this.parse_request(request);
     const id = this.msg_sender;
@@ -281,7 +281,7 @@ class sellItems extends AdvanceRoute {
   };
 }
 
-class buySword extends AdvanceRoute {
+class buySword extends WalletRoute {
   execute = (request: any) => {
     this.parse_request(request);
     const id = this.msg_sender;
@@ -309,7 +309,7 @@ class buySword extends AdvanceRoute {
   };
 }
 
-class MintGold extends AdvanceRoute {
+class MintGold extends WalletRoute {
   execute = (request: any) => {
     this.parse_request(request);
     console.log("minting gold");
@@ -334,7 +334,7 @@ class MintGold extends AdvanceRoute {
   };
 }
 
-class MintAssets extends AdvanceRoute {
+class MintAssets extends WalletRoute {
   execute = (request: any) => {
     this.parse_request(request);
     console.log("minting erc721 token.....");
@@ -382,6 +382,17 @@ const send_request = async (output: Output | Set<Output>) => {
     });
   }
 };
+
+router.addRoute("createUser", new createUser());
+router.addRoute("setCatchPhrase", new setCatchPhrase());
+router.addRoute("signupforMission", new signupforMission());
+router.addRoute("acceptMission", new acceptMission());
+router.addRoute("fightDragon", new fightDragon());
+router.addRoute("lootDragon", new lootDragon());
+router.addRoute("sellItems", new sellItems());
+router.addRoute("buySword", new buySword(wallet));
+router.addRoute("mintGold", new MintGold(wallet));
+router.addRoute("mintAssets", new MintAssets(wallet));
 
 async function handle_advance(data: any) {
   console.log("Received advance request data " + JSON.stringify(data));

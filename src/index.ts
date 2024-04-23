@@ -87,10 +87,12 @@ class MissionDragon {
     this.assets = assets;
   };
 }
+["find dragon", "kill dragon", "find gnome", "cook omlette"]
 
 class Player {
   Id: string;
   private Level: number;
+  private Missions: Map<number, string>
   private CatchPhrase: string;
   private assets: Array<string>;
   private Dragon: MissionDragon;
@@ -105,6 +107,11 @@ class Player {
     this.Dragon = new MissionDragon();
     this.coins = 100;
     this.swords = new Map();
+    this.Missions = new Map();
+    this.Missions.set(0, "Find Dragon");
+    this.Missions.set(1, "Kill Dragon");
+    this.Missions.set(2, "find gnome");
+    this.Missions.set(3, "cook omlette")
   }
   getAssets = (): Array<string> => {
     return this.assets;
@@ -156,6 +163,16 @@ class Player {
   addSword = (id: string, price: BigInt) => {
     this.swords.set(id, price);
   };
+
+  listMissions = () => {
+    return JSON.stringify(this.Missions);
+  }
+
+  acceptMission = (task: number) => {
+    this.Missions.delete(task);
+    this.setPlayerLevel(task);
+  }
+
 }
 
 // Players is a Dynamic DA that holds unique player data coressponding to each user
@@ -196,7 +213,7 @@ class signupforMission extends AdvanceRoute {
     if (player == undefined) {
       return new Error_out(`User with id:${id} not found`);
     }
-    return new Report(`User at the mission number:${player?.getPlayerLevel()}`);
+    return new Report(`Choose a mission ${player?.listMissions()}`);
   };
 }
 
@@ -208,8 +225,7 @@ class acceptMission extends AdvanceRoute {
     if (player == undefined) {
       return new Error_out(`User with id:${id} not found`);
     }
-    player?.setPlayerLevel(player.getPlayerLevel() + 1);
-    Players.set(player.Id, player);
+    player.acceptMission(this.request_args.mission);
     return new Report(`User at the mission number:${player?.getPlayerLevel()}`);
   };
 }

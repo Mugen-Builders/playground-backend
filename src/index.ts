@@ -1,4 +1,4 @@
-import { AdvanceRoute, Router, WalletRoute } from "cartesi-router";
+import { AdvanceRoute, DefaultRoute, Router, WalletRoute } from "cartesi-router";
 import {
   Wallet,
   Notice,
@@ -32,7 +32,11 @@ let dappcontract = "0xa"; //address of the cartesi Dapp contract
 const SWORD_PRICE = BigInt(100000000); //price of each sword on the game
 const wallet = new Wallet(new Map());
 const router = new Router(wallet);
-
+const Missions = new Map();
+Missions.set(0, "Find Dragon");
+Missions.set(1, "Kill Dragon");
+Missions.set(2, "find gnome");
+Missions.set(3, "cook omlette");
 /** HouseAssets holds all the native assets of this game centrally 
  
 **/
@@ -87,7 +91,6 @@ class MissionDragon {
     this.assets = assets;
   };
 }
-["find dragon", "kill dragon", "find gnome", "cook omlette"]
 
 class Player {
   Id: string;
@@ -111,7 +114,7 @@ class Player {
     this.Missions.set(0, "Find Dragon");
     this.Missions.set(1, "Kill Dragon");
     this.Missions.set(2, "find gnome");
-    this.Missions.set(3, "cook omlette")
+    this.Missions.set(3, "cook omlette");
   }
   getAssets = (): Array<string> => {
     return this.assets;
@@ -178,6 +181,27 @@ class Player {
 // Players is a Dynamic DA that holds unique player data coressponding to each user
 let Players: Map<string, Player> = new Map();
 
+class createNotice extends AdvanceRoute {
+  execute = (request: any) => {
+    this.parse_request(request);
+    return new Notice(request.args.data);
+  }
+}
+
+class createReport extends AdvanceRoute {
+  execute = (request: any) => {
+    this.parse_request(request);
+    return new Report(request.args.data);
+  }
+}
+
+
+class listMissions extends AdvanceRoute {
+  execute = (request: any) => {
+    this.parse_request(request);
+    return new Report(JSON.stringify(Missions));
+  }
+}
 /**
  * Each method defines an action that the player can perform while interacting with the DApp
  */
@@ -204,6 +228,8 @@ class setCatchPhrase extends AdvanceRoute {
     return new Notice(`Catchphrase set for User with Id:${id}`);
   };
 }
+
+
 
 class signupforMission extends AdvanceRoute {
   execute = (request: any) => {
@@ -399,6 +425,9 @@ const send_request = async (output: Output | Set<Output>) => {
   }
 };
 
+router.addRoute("createNotice", new createNotice());
+router.addRoute("createReport", new createReport());
+router.addRoute("listMissions", new listMissions());
 router.addRoute("createUser", new createUser());
 router.addRoute("setCatchPhrase", new setCatchPhrase());
 router.addRoute("signupforMission", new signupforMission());

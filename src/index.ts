@@ -77,7 +77,7 @@ class MissionDragon {
     return this.Health;
   };
   reduceHealth = () => {
-    if (this.Health != 0) {
+    if (this.Health <= 10) {
       console.log("Your dragon is dead");
     } else {
       this.Health = this.Health - 10;
@@ -184,14 +184,14 @@ let Players: Map<string, Player> = new Map();
 class createNotice extends AdvanceRoute {
   execute = (request: any) => {
     this.parse_request(request);
-    return new Notice(request.args.data);
+    return new Notice(this.request_args.data);
   }
 }
 
 class createReport extends AdvanceRoute {
   execute = (request: any) => {
     this.parse_request(request);
-    return new Report(request.args.data);
+    return new Report(this.request_args.data);
   }
 }
 
@@ -202,6 +202,7 @@ class listMissions extends AdvanceRoute {
     return new Report(JSON.stringify(Missions));
   }
 }
+
 /**
  * Each method defines an action that the player can perform while interacting with the DApp
  */
@@ -271,7 +272,7 @@ class fightDragon extends AdvanceRoute {
     }
     player.setDragon(dragon);
     Players.set(player.Id, player);
-    return new Notice(
+    return new Report(
       JSON.stringify({ health: dragon.getHealth(), dragonId: dragon.Id })
     );
   };
@@ -425,19 +426,19 @@ const send_request = async (output: Output | Set<Output>) => {
   }
 };
 
-router.addRoute("createNotice", new createNotice());
-router.addRoute("createReport", new createReport());
-router.addRoute("listMissions", new listMissions());
-router.addRoute("createUser", new createUser());
-router.addRoute("setCatchPhrase", new setCatchPhrase());
-router.addRoute("signupforMission", new signupforMission());
-router.addRoute("acceptMission", new acceptMission());
-router.addRoute("fightDragon", new fightDragon());
-router.addRoute("lootDragon", new lootDragon());
-router.addRoute("sellItems", new sellItems());
-router.addRoute("buySword", new buySword(wallet));
-router.addRoute("mintGold", new MintGold(wallet));
-router.addRoute("mintAssets", new MintAssets(wallet));
+router.addRoute("create_notice", new createNotice());
+router.addRoute("create_report", new createReport());
+router.addRoute("list_missions", new listMissions());
+router.addRoute("create_user", new createUser());
+router.addRoute("set_catchphrase", new setCatchPhrase());
+router.addRoute("signup_formission", new signupforMission());
+router.addRoute("accept_mission", new acceptMission());
+router.addRoute("fight_dragon", new fightDragon());
+router.addRoute("loot_dragon", new lootDragon());
+router.addRoute("sell_items", new sellItems());
+router.addRoute("buy_sword", new buySword(wallet));
+router.addRoute("mint_gold", new MintGold(wallet));
+router.addRoute("mint_assets", new MintAssets(wallet));
 
 async function handle_advance(data: any) {
   console.log("Received advance request data " + JSON.stringify(data));

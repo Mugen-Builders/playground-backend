@@ -33,10 +33,9 @@ const SWORD_PRICE = BigInt(100000000); //price of each sword on the game
 const wallet = new Wallet(new Map());
 const router = new Router(wallet);
 const Missions = new Map();
-Missions.set(0, "Find Dragon");
-Missions.set(1, "Kill Dragon");
-Missions.set(2, "find gnome");
-Missions.set(3, "cook omlette");
+Missions.set(0, "Kill the Dragon");
+Missions.set(1, "Find a gnome");
+Missions.set(2, "Make omlette");
 /** HouseAssets holds all the native assets of this game centrally 
  
 **/
@@ -111,10 +110,9 @@ class Player {
     this.coins = 100;
     this.swords = new Map();
     this.Missions = new Map();
-    this.Missions.set(0, "Find Dragon");
-    this.Missions.set(1, "Kill Dragon");
-    this.Missions.set(2, "find gnome");
-    this.Missions.set(3, "cook omlette");
+    this.Missions.set(0, "Kill the Dragon");
+    this.Missions.set(1, "Find a gnome");
+    this.Missions.set(2, "Make omlette");
   }
   getAssets = (): Array<string> => {
     return this.assets;
@@ -168,11 +166,13 @@ class Player {
   };
 
   listMissions = () => {
-    return JSON.stringify(this.Missions);
+    return Object.fromEntries(this.Missions);
   }
 
   acceptMission = (task: number) => {
-    this.Missions.delete(task);
+    if (!this.Missions.delete(task)) {
+      throw "not in list"
+    }
     this.setPlayerLevel(task);
   }
 
@@ -224,9 +224,9 @@ class setCatchPhrase extends AdvanceRoute {
     if (player == undefined) {
       return new Error_out(`User with id:${id} not found`);
     }
-    player?.setCatchPhrase(this.request_args.phrase);
+    player?.setCatchPhrase(this.request_args.phrase.toUpperCase());
     Players.set(player.Id, player);
-    return new Notice(`Catchphrase set for User with Id:${id}`);
+    return new Notice(this.request_args.phrase.toUpperCase());
   };
 }
 
@@ -252,8 +252,14 @@ class acceptMission extends AdvanceRoute {
     if (player == undefined) {
       return new Error_out(`User with id:${id} not found`);
     }
-    player.acceptMission(this.request_args.mission);
-    return new Report(`User at the mission number:${player?.getPlayerLevel()}`);
+    try {
+      player.acceptMission(this.request_args.mission);
+    } catch (error) {
+      return new Report("Mission not found");  
+    }
+    return new Notice(`{ 
+      missionSelected: ${player?.getPlayerLevel()}
+    }`);
   };
 }
 
@@ -390,6 +396,20 @@ class MintAssets extends WalletRoute {
   };
 }
 
+class ListMissions extends DefaultRoute {
+  public execute = (request: any) => {
+    console.log("user is ", request);
+    let player = Players.get(request.toLowerCase())
+    let missions = player?.listMissions() 
+    return new Report(
+      JSON.stringify({
+        missions
+      })
+    );
+ 
+  };
+}
+
 var handlers: any = {
   advance_state: handle_advance,
   inspect_state: handle_inspect,
@@ -428,7 +448,7 @@ const send_request = async (output: Output | Set<Output>) => {
 
 router.addRoute("create_notice", new createNotice());
 router.addRoute("create_report", new createReport());
-router.addRoute("list_missions", new listMissions());
+// router.addRoute("list_missions", new listMissions());
 router.addRoute("create_user", new createUser());
 router.addRoute("set_catchphrase", new setCatchPhrase());
 router.addRoute("signup_formission", new signupforMission());
@@ -436,6 +456,9 @@ router.addRoute("accept_mission", new acceptMission());
 router.addRoute("fight_dragon", new fightDragon());
 router.addRoute("loot_dragon", new lootDragon());
 router.addRoute("sell_items", new sellItems());
+
+router.addRoute("list_missions", new ListMissions());
+
 router.addRoute("buy_sword", new buySword(wallet));
 router.addRoute("mint_gold", new MintGold(wallet));
 router.addRoute("mint_assets", new MintAssets(wallet));

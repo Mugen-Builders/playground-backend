@@ -101,11 +101,9 @@ function lootDragon(sender, inventories, dragonAssets) {
   let l = dragonAssets.length
   for (let i=0; i < l; i++) {
     let asset = dragonAssets.pop()
-    console.log(asset)
     inventory.push(asset)
   }
 
-  console.log("Inventory after looting: ", inventory);
   return {
     player: sender,
     inventory: inventory
@@ -124,7 +122,6 @@ function sellAssets(sender, inventory, wallet) {
   // Clear the inventory after selling
   inventory[sender] = []
   
-  console.log(`${sender} earned ${wallet[sender].gold} gold from selling assets.`)
   return {
     player: sender,
     wallet: wallet[sender]
@@ -161,9 +158,7 @@ function parseDeposit(payload) {
 }
 
 function deposit(payload, wallet) {
-  console.log("pw", payload, wallet)
   let { sender, value } = parseDeposit(payload)
-  console.log("sv", sender, value)
   if (!wallet[sender]) {
     wallet[sender] = { ether: BigInt(0) }
   }

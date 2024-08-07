@@ -1,0 +1,35 @@
+app = "jplayground"
+
+[build]
+image = "registry.fly.io/jplayground"
+
+[http_service]
+internal_port = 10000
+force_https = true
+
+[http_service.concurrency]
+type = "requests"
+soft_limit = 200
+hard_limit = 250
+
+[[http_service.checks]]
+grace_period = "10s"
+interval = "30s"
+method = "GET"
+timeout = "5s"
+path = "/healthz"
+
+[[vm]]
+size = "shared-cpu-1x"
+memory = "2gb"
+
+[env]
+CARTESI_BLOCKCHAIN_FINALITY_OFFSET = "1"
+CARTESI_BLOCKCHAIN_ID = "11155111"
+CARTESI_CONTRACTS_APPLICATION_ADDRESS = "0x9aac56Acda6168d33Ffa321C2Da43b505e4FFf32"
+CARTESI_CONTRACTS_AUTHORITY_ADDRESS = "0xBB56df41697378a379a7fCaD448D49d6baB75be3"
+CARTESI_CONTRACTS_HISTORY_ADDRESS = "0xdCC131d76c336a22322781cCbe562734B2f0042d"
+CARTESI_CONTRACTS_INPUT_BOX_ADDRESS = "0x59b22D57D4f067708AB0c00552767405926dc768"
+CARTESI_CONTRACTS_INPUT_BOX_DEPLOYMENT_BLOCK_NUMBER = "3963384"
+CARTESI_EPOCH_LENGTH = "7200"
+

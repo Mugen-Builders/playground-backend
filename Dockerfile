@@ -6,7 +6,7 @@
 # If any needed dependencies rely on native binaries, you must use 
 # a riscv64 image such as cartesi/node:20-jammy for the build stage,
 # to ensure that the appropriate binaries will be generated.
-FROM node:20.8.0-bookworm as build-stage
+FROM node:20.8.0-bookworm AS build-stage
 
 WORKDIR /opt/cartesi/dapp
 COPY . .
@@ -24,7 +24,7 @@ ADD https://github.com/cartesi/machine-emulator-tools/releases/download/v${MACHI
 RUN dpkg -i /machine-emulator-tools-v${MACHINE_EMULATOR_TOOLS_VERSION}.deb \
   && rm /machine-emulator-tools-v${MACHINE_EMULATOR_TOOLS_VERSION}.deb
 
-LABEL io.sunodo.sdk_version=0.4.0
+LABEL io.cartesi.rollups.sdk_version=0.9.0
 LABEL io.cartesi.rollups.ram_size=128Mi
 
 ARG DEBIAN_FRONTEND=noninteractive
